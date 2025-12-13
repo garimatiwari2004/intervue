@@ -46,13 +46,26 @@ io.on("connection", (socket) => {
 
     console.log("A user connected:", socket.id);
     socket.on("join", ({ name, role }) => {
-        if (role === "student") {
-            pollState.totalStudents++;
-        }
-    });
+    if (role === "student") {
+        pollState.totalStudents++;
+    }
+
+    // 🔥 If a poll is already active, send it immediately
+    if (pollState.active) {
+        socket.emit("poll_started", {
+            question: pollState.question,
+            options: pollState.options,
+            duration: pollState.duration
+        });
+
+        // Also send current answers for live results
+        socket.emit("poll_update", pollState.answers);
+    }
+});
 
 
-    socket.on("create_poll", ({ question, options }) => {
+
+    socket.on("create_poll", ({ question, options, duration }) => {
         if (pollState.active) return;
 
         pollState.active = true;
@@ -60,20 +73,21 @@ io.on("connection", (socket) => {
         pollState.options = options;
         pollState.answers = {};
         pollState.startTime = Date.now();
-
+        pollState.duration = duration || 60000;
 
         pollState.timer = setTimeout(() => {
             endPoll();
         }, pollState.duration);
 
         io.emit("poll_started", {
-            question,
-            options,
+            question: pollState.question,
+            options: pollState.options,
             duration: pollState.duration
         });
 
-        console.log("Poll started:", question);
+        console.log("Poll started:", pollState);
     });
+
 
     socket.on("submit_answer", ({ name, answer }) => {
         if (!pollState.active) return;
