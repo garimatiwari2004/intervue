@@ -145,7 +145,7 @@ export default function StudentPoll() {
         {/* ================= LIVE RESULTS ================= */}
         {(submitted || timeLeft === 0) && (
           <div className="mt-6">
-            <h3 className="font-semibold mb-4">Live Poll Results</h3>
+            <div className="font-semibold mb-4 bg-[#373737] text-white p-2 rounded-t-lg">{poll.question}</div>
 
             {(() => {
               const counts = {};

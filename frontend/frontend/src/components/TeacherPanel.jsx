@@ -4,36 +4,26 @@ import { socket } from "../socket";
 
 export default function TeacherPanel() {
   // ===== FORM STATE =====
-  const [activeQuestion, setActiveQuestion] = useState("");
-
   const [question, setQuestion] = useState("");
   const [time, setTime] = useState(60);
   const [options, setOptions] = useState([{ text: "" }, { text: "" }]);
 
-  // ===== POLL STATE =====
+  // ===== ACTIVE POLL STATE =====
   const [pollActive, setPollActive] = useState(false);
+  const [activeQuestion, setActiveQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState([]);
   const [results, setResults] = useState({});
   const [timeLeft, setTimeLeft] = useState(null);
 
   // ================= SOCKET LISTENERS =================
-  const getPercentage = (count, total) => {
-    if (total === 0) return 0;
-    return Math.round((count / total) * 100);
-  };
-
   useEffect(() => {
-    // Poll started
     socket.on("poll_started", (data) => {
-      console.log("TEACHER → poll_started", data);
-
       setPollActive(true);
-      setPollOptions(data.options);
       setActiveQuestion(data.question);
+      setPollOptions(data.options);
       setResults({});
       setTimeLeft(data.duration / 1000);
 
-      // Countdown timer
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -45,16 +35,12 @@ export default function TeacherPanel() {
       }, 1000);
     });
 
-    // Live updates
     socket.on("poll_update", (answers) => {
-      console.log("TEACHER → poll_update", answers);
       setResults(answers);
     });
 
-    // Poll ended
     socket.on("poll_end", () => {
-      console.log("TEACHER → poll_end");
-      setPollActive(false);
+      setTimeLeft(0);
     });
 
     return () => {
@@ -99,7 +85,7 @@ export default function TeacherPanel() {
     <div className="min-h-screen bg-white px-20 py-8 flex flex-col">
       {/* HEADER */}
       <div className="flex items-center gap-2 mb-6">
-        <div className="flex items-center gap-2 bg-linear-to-r from-primary via-accent to-secondary text-white px-3 py-1 rounded-full text-sm">
+        <div className="flex items-center gap-2 bg-gradient-to-r from-primary via-accent to-secondary text-white px-3 py-1 rounded-full text-sm">
           <Sparkles size={14} />
           Intervue Poll
         </div>
@@ -111,7 +97,7 @@ export default function TeacherPanel() {
         Create polls, ask questions, and monitor student responses in real time.
       </p>
 
-      {/* CREATE POLL (ONLY WHEN NO ACTIVE POLL) */}
+      {/* ================= CREATE POLL ================= */}
       {!pollActive && (
         <>
           <div className="flex justify-between items-center mb-6 max-w-4xl">
@@ -119,7 +105,7 @@ export default function TeacherPanel() {
 
             <select
               value={time}
-              onChange={(e) => setTime(e.target.value)}
+              onChange={(e) => setTime(Number(e.target.value))}
               className="border px-3 py-1 rounded-md text-sm"
             >
               <option value={60}>60 seconds</option>
@@ -160,7 +146,7 @@ export default function TeacherPanel() {
 
             <button
               onClick={() => setOptions([...options, { text: "" }])}
-              className="text-purple-600 border p-2 rounded-lg text-sm font-medium mt-2"
+              className="text-purple-600 border px-3 py-2 rounded-lg text-sm font-medium"
             >
               + Add More option
             </button>
@@ -168,77 +154,81 @@ export default function TeacherPanel() {
         </>
       )}
 
-      {/* LIVE RESULTS */}
+      {/* ================= LIVE RESULTS ================= */}
       {pollActive && (
-        <div className="flex flex-col items-center mt-16">
-          {/* Section title */}
-          <div className="w-full max-w-3xl mb-3 text-sm font-medium text-gray-700">
-            Question
+        <div className="w-full max-w-3xl mx-auto mt-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">
+              Question {/** you can add number later */}
+            </h2>
+
+            {timeLeft !== null && (
+              <div className="flex items-center gap-2 text-red-600 font-semibold">
+                ⏱ {timeLeft}
+              </div>
+            )}
           </div>
 
-          {/* Poll Card */}
-          <div className="w-full max-w-3xl border border-purple-300 rounded-lg overflow-hidden">
-            {/* Question Header */}
-            <div className="bg-[#5f5f5f] text-white px-4 py-3 text-sm font-medium">
-              {activeQuestion || "Question"}
-            </div>
+          <div className="bg-[#373737] p-2 rounded-t-lg text-white text-lg font-semibold mb-4">{activeQuestion}</div>
 
-            {/* Results Body */}
-            <div className="p-4 space-y-4 bg-white">
-              {(() => {
-                const counts = getCounts();
-                const total =
-                  Object.values(counts).reduce((a, b) => a + b, 0) || 1;
+          {/* Results */}
+          <div className="space-y-4">
+            {(() => {
+              const counts = getCounts();
+              const total =
+                Object.values(counts).reduce((a, b) => a + b, 0) || 1;
 
-                return Object.entries(counts).map(([option, count], index) => {
-                  const percent = Math.round((count / total) * 100);
+              return Object.entries(counts).map(([option, count], index) => {
+                const percent = Math.round((count / total) * 100);
 
-                  return (
+                return (
+                  <div
+                    key={option}
+                    className="relative w-full rounded-lg overflow-hidden border"
+                  >
+                    {/* Filled background */}
                     <div
-                      key={option}
-                      className="border border-purple-200 rounded-md p-2"
-                    >
-                      {/* Row */}
-                      <div className="flex items-center justify-between mb-1 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center font-semibold">
-                            {index + 1}
-                          </div>
-                          <span>{option}</span>
+                      className="absolute inset-y-0 left-0 border-none bg-linear-to-r from-primary via-accent to-secondary"
+                      style={{ width: `${percent}%` }}
+                    />
+
+                    {/* Content */}
+                    <div className="relative z-10 flex items-center justify-between px-4 py-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 flex items-center justify-center rounded-full bg-white text-black font-semibold">
+                          {index + 1}
                         </div>
-
-                        <span className="text-gray-700 font-medium">
-                          {percent}%
-                        </span>
+                        <span className="font-medium text-black">{option}</span>
                       </div>
 
-                      {/* Progress Bar */}
-                      <div className="w-full bg-gray-100 h-3 rounded overflow-hidden">
-                        <div
-                          className="bg-purple-600 h-3 transition-all"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
+                      <span className="font-semibold text-black">
+                        {percent}%
+                      </span>
                     </div>
-                  );
-                });
-              })()}
-            </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
+
+          
 
           {/* Ask New Question */}
-          <button
-            disabled={timeLeft > 0}
-            onClick={() => setPollActive(false)}
-            className={`mt-8 px-8 py-3 rounded-full font-medium text-white
-        ${
-          timeLeft > 0
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-purple-600 hover:bg-purple-700"
-        }`}
-          >
-            + Ask a new question
-          </button>
+          <div className="flex justify-center mt-6">
+            <button
+              disabled={timeLeft > 0}
+              onClick={() => setPollActive(false)}
+              className={`px-8 py-3 rounded-full font-medium text-white
+          ${
+            timeLeft > 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-linear-to-r from-primary via-accent to-secondary hover:bg-accent hover:cursor-pointer"
+          }`}
+            >
+              + Ask a new question
+            </button>
+          </div>
         </div>
       )}
 
@@ -247,7 +237,7 @@ export default function TeacherPanel() {
         <div className="mt-auto flex justify-end">
           <button
             onClick={handleAskQuestion}
-            className="px-6 py-3 rounded-full font-medium text-white bg-linear-to-r from-primary via-accent to-secondary"
+            className="px-6 py-3 rounded-full font-medium text-white bg-gradient-to-r from-primary via-accent to-secondary"
           >
             Ask Question
           </button>
