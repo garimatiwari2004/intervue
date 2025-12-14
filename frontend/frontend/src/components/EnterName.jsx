@@ -28,9 +28,9 @@ export default function EnterName() {
       </h1>
 
       <p className="text-center max-w-xl text-gray-500 mb-8">
-        Submit answers, participate in live polls, and compare responses.
+         If you’re a student, you’ll be able to <span className="font-bold">submit your answers</span>, participate in live polls, and see how your responses compare with your classmates
       </p>
-
+      <div className="space-y-4">
       <label className="text-gray-700 font-medium">Enter your Name</label>
 
       <input
@@ -39,13 +39,14 @@ export default function EnterName() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
+      </div>
 
       <button
         onClick={handleSubmit}
         disabled={!value.trim()}
-        className={`w-full max-w-md py-3 rounded-md text-white font-semibold
+        className={`px-2 max-w-md md:w-48 py-3 rounded-3xl text-white font-semibold
           ${value.trim()
-            ? "bg-gradient-to-r from-purple-500 to-indigo-500"
+            ? "bg-linear-to-r from-primary via-secondary to-accent hover:scale-105 transition-transform shadow-lg"
             : "bg-gray-300 cursor-not-allowed"}`}
       >
         Continue
