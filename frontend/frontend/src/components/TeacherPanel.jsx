@@ -99,7 +99,7 @@ export default function TeacherPanel() {
     <div className="min-h-screen bg-white px-20 py-8 flex flex-col">
       {/* HEADER */}
       <div className="flex items-center gap-2 mb-6">
-        <div className="flex items-center gap-2 bg-gradient-to-r from-primary via-accent to-secondary text-white px-3 py-1 rounded-full text-sm">
+        <div className="flex items-center gap-2 bg-linear-to-r from-primary via-accent to-secondary text-white px-3 py-1 rounded-full text-sm">
           <Sparkles size={14} />
           Intervue Poll
         </div>
@@ -247,7 +247,7 @@ export default function TeacherPanel() {
         <div className="mt-auto flex justify-end">
           <button
             onClick={handleAskQuestion}
-            className="px-6 py-3 rounded-full font-medium text-white bg-gradient-to-r from-primary via-accent to-secondary"
+            className="px-6 py-3 rounded-full font-medium text-white bg-linear-to-r from-primary via-accent to-secondary"
           >
             Ask Question
           </button>

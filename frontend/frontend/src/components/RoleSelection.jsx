@@ -14,7 +14,7 @@ export default function RoleSelection() {
     return (
         <div className="min-h-screen flex flex-col justify-center items-center space-y-5 p-5">
             
-            <div className="flex font-semibold text-white gap-2 bg-gradient-to-r from-primary via-secondary to-accent px-3 py-2 rounded-4xl shadow-lg text-center">
+            <div className="flex font-semibold text-white gap-2 bg-linear-to-r from-primary via-secondary to-accent px-3 py-2 rounded-4xl shadow-lg text-center">
                 <Sparkles />
                 <h2 className="text-md">Intervue Poll</h2>
             </div>
@@ -66,7 +66,7 @@ export default function RoleSelection() {
                     className={`px-6 py-3 rounded-4xl w-48 font-semibold text-white
                         transition-all
                         ${selectedRole
-                            ? "bg-gradient-to-r from-primary via-accent to-secondary hover:opacity-90"
+                            ? "bg-linear-to-r from-primary via-accent to-secondary hover:opacity-90"
                             : "bg-gray-400 cursor-not-allowed"}`}
                 >
                     Continue
